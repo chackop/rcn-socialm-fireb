@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TouchableHighlight } from 'react-native';
-import { fireB, auth, storage, appId } from './config/config';
+import { fireB, auth, storage, appID } from './config/config';
 import * as Facebook from 'expo-facebook';
+import { AccessToken, LoginManager } from 'react-native-fbsdk';
+import firebase from 'react-native-firebase'
 
 export const registerUser = (email, passw) => {
   console.log(email, passw)
@@ -12,27 +14,32 @@ export const registerUser = (email, passw) => {
 
 const loginWithFB = async () => {
   try {
-    console.log('loginWithFB')
-    await Facebook.initializeAsync('');
-    console.log('initializeAsync Success');
+    const result = await LoginManager.logInWithReadPermissions(['public_profile', 'email']);
 
-    const { type, token } = await Facebook.logInWithReadPermissionsAsync(
-      appId,
-      {
-        permissions: ['public_profile']
-      });
-
-
-    if (type === 'success') {
-      const credentials = await fireB.auth.FacebookAuthProvider.credential(token);
-
-      const signInWithCredential = await fireB.auth().signInWithCredential(credentials);
-
-      console.log(signInWithCredential);
+    if (result.isCancelled) {
+      // handle this however suites the flow of your app
+      throw new Error('User cancelled request');
     }
 
-  } catch (error) {
-    console.log('Error in login', error)
+    console.log(`Login success with permissions: ${result.grantedPermissions.toString()}`);
+
+    // get the access token
+    const data = await AccessToken.getCurrentAccessToken();
+
+    if (!data) {
+      // handle this however suites the flow of your app
+      throw new Error('Something went wrong obtaining the users access token');
+    }
+
+    // create a new firebase credential with the token
+    const credential = firebase.auth.FacebookAuthProvider.credential(data.accessToken);
+
+    // login with credential
+    const firebaseUserCredential = await firebase.auth().signInWithCredential(credential);
+
+    console.warn(JSON.stringify(firebaseUserCredential.user.toJSON()))
+  } catch (e) {
+    console.error(e);
   }
 }
 

@@ -2,6 +2,17 @@ import * as firebase from 'firebase';
 
 // Initialize Firebase
 
+const firebaseConfig = {
+    apiKey: "apiKey",
+    authDomain: "authDomain",
+    databaseURL: "databaseURL",
+    projectId: "projectId",
+    storageBucket: "storageBucket",
+    messagingSenderId: "messagingSenderId",
+    appId: "appId",
+    measurementId: "measurementId"
+};
+export const FBappID = 'appID'
 
 firebase.initializeApp(firebaseConfig);
 
