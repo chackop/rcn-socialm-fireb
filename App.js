@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { fireB, auth, storage } from './config/config'
+import { StyleSheet, Text, View, TouchableHighlight } from 'react-native';
+import { fireB, auth, storage, appId } from './config/config';
+import * as Facebook from 'expo-facebook';
 
 export const registerUser = (email, passw) => {
   console.log(email, passw)
@@ -8,6 +9,33 @@ export const registerUser = (email, passw) => {
     .then((user) => console.log(email, passw, user))
     .catch(err => console.log("Error", err))
 }
+
+const loginWithFB = async () => {
+  try {
+    console.log('loginWithFB')
+    await Facebook.initializeAsync('');
+    console.log('initializeAsync Success');
+
+    const { type, token } = await Facebook.logInWithReadPermissionsAsync(
+      appId,
+      {
+        permissions: ['public_profile']
+      });
+
+
+    if (type === 'success') {
+      const credentials = await fireB.auth.FacebookAuthProvider.credential(token);
+
+      const signInWithCredential = await fireB.auth().signInWithCredential(credentials);
+
+      console.log(signInWithCredential);
+    }
+
+  } catch (error) {
+    console.log('Error in login', error)
+  }
+}
+
 
 
 export default function App() {
@@ -37,6 +65,11 @@ export default function App() {
   return (
     <View style={styles.container}>
       <Text>Social Media App</Text>
+      <TouchableHighlight
+        onPress={loginWithFB}
+        style={styles.button}>
+        <Text style={styles.button}>Login with FB</Text>
+      </TouchableHighlight>
     </View>
   );
 }
@@ -48,4 +81,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  button: {
+    backgroundColor: 'green'
+  },
+  buttonText: {
+    color: 'white'
+  }
 });

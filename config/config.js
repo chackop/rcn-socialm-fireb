@@ -1,9 +1,7 @@
 import * as firebase from 'firebase';
 
 // Initialize Firebase
-const firebaseConfig = {
 
-};
 
 firebase.initializeApp(firebaseConfig);
 
